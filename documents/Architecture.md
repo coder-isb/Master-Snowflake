@@ -1,5 +1,5 @@
 **
-1. Snowflake Architecture Overview**
+**1. Snowflake Architecture Overview****
 
 Q1: Explain Snowflake architecture. How does it differ from traditional data warehouses?
 Answer:
