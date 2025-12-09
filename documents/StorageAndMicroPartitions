@@ -1,0 +1,432 @@
+# Snowflake Storage & Micro-partitions Deep Dive
+
+This document provides a **comprehensive 50-question guide** on Snowflake’s storage architecture and micro-partitions. It covers **basics, clustering, storage optimization, query performance, and advanced topics**. Perfect for interview prep or deep learning.
+
+---
+
+## Table of Contents
+
+1. [Micro-partitions Basics](#1-micro-partitions-basics)  
+2. [Clustering & Partitioning](#2-clustering--partitioning)  
+3. [Storage Optimization](#3-storage-optimization)  
+4. [Query Performance & Micro-partitions](#4-query-performance--micro-partitions)  
+5. [Advanced Micro-partition Topics](#5-advanced-micro-partition-topics)
+
+---
+
+## 1. Micro-partitions Basics
+
+<details>
+<summary>Q1: What are micro-partitions in Snowflake?</summary>
+
+**Answer:**  
+- Micro-partitions are **16 MB compressed columnar storage blocks**.  
+- Each stores metadata like **column min/max, null counts, distinct values, and clustering info**.  
+
+**Follow-up Q&A:**  
+- **Q:** Why are they important?  
+  **A:** Enable **automatic pruning** of irrelevant data during query execution.  
+- **Q:** Are micro-partitions visible to users?  
+  **A:** Only via Snowflake system functions.
+</details>
+
+<details>
+<summary>Q2: How is data physically stored in micro-partitions?</summary>
+
+**Answer:**  
+- Columnar format in **cloud object storage**.  
+- Compressed to reduce storage footprint.  
+- Metadata stored internally for query optimization.
+</details>
+
+<details>
+<summary>Q3: What metadata is maintained in each micro-partition?</summary>
+
+**Answer:**  
+- Column **min/max values**  
+- Number of **NULLs**  
+- Number of **distinct values**  
+- **Clustering key ranges**  
+
+**Follow-up Q&A:**  
+- **Q:** How does Snowflake use this metadata?  
+  **A:** It skips scanning partitions that cannot match query filters.
+</details>
+
+<details>
+<summary>Q4: How does Snowflake achieve automatic data pruning?</summary>
+
+**Answer:**  
+- Uses **metadata of micro-partitions** to eliminate irrelevant partitions before query execution.  
+- Fully automatic, no manual intervention needed.
+</details>
+
+<details>
+<summary>Q5: How many micro-partitions does a typical table have?</summary>
+
+**Answer:**  
+- Depends on **table size, number of columns, and clustering**.  
+- Can range from **hundreds to millions** of micro-partitions.
+</details>
+
+<details>
+<summary>Q6: Can micro-partitions be manually managed?</summary>
+
+**Answer:**  
+- No, Snowflake automatically manages creation, maintenance, and pruning.  
+- Users can influence behavior through **clustering keys**.
+</details>
+
+<details>
+<summary>Q7: What is the default size of a micro-partition?</summary>
+
+**Answer:**  
+- Approximately **16 MB compressed**.  
+- Slightly adjusted by Snowflake for performance optimization.
+</details>
+
+<details>
+<summary>Q8: How does Snowflake handle inserts in micro-partitions?</summary>
+
+**Answer:**  
+- New rows are written into **new micro-partitions**.  
+- Micro-partitions are **immutable** once created.  
+- Updates create new versions, retaining old ones for **Time Travel**.
+</details>
+
+<details>
+<summary>Q9: How does deletion affect micro-partitions?</summary>
+
+**Answer:**  
+- Deleted rows are **marked logically**.  
+- Physical cleanup occurs later.  
+- **Time Travel** retains deleted data temporarily.
+</details>
+
+<details>
+<summary>Q10: Are micro-partitions compressed?</summary>
+
+**Answer:**  
+- Yes, Snowflake uses **columnar compression algorithms** optimized for each data type.
+</details>
+
+---
+
+## 2. Clustering & Partitioning
+
+<details>
+<summary>Q11: What is a clustering key?</summary>
+
+**Answer:**  
+- A **column or set of columns** that defines the sort order of micro-partitions.  
+- Improves pruning and query performance on selective queries.
+</details>
+
+<details>
+<summary>Q12: How does clustering improve query performance?</summary>
+
+**Answer:**  
+- Groups similar values together.  
+- Reduces the number of micro-partitions scanned.
+</details>
+
+<details>
+<summary>Q13: Is clustering mandatory?</summary>
+
+**Answer:**  
+- No, optional but recommended for **large and selective tables**.
+</details>
+
+<details>
+<summary>Q14: What is automatic clustering?</summary>
+
+**Answer:**  
+- Snowflake can reorganize micro-partitions **automatically in the background** to maintain clustering efficiency.
+</details>
+
+<details>
+<summary>Q15: How does clustering interact with Time Travel?</summary>
+
+**Answer:**  
+- Time Travel retains historical versions regardless of clustering.  
+- Clustering affects only current and future partitions.
+</details>
+
+<details>
+<summary>Q16: How are clustering statistics stored?</summary>
+
+**Answer:**  
+- Stored in **metadata of micro-partitions**, including min/max values for clustering columns.
+</details>
+
+<details>
+<summary>Q17: Can multiple clustering keys be defined?</summary>
+
+**Answer:**  
+- Yes, **compound clustering keys** are supported.
+</details>
+
+<details>
+<summary>Q18: What are best practices for clustering keys?</summary>
+
+**Answer:**  
+- Use **high-cardinality, selective columns**.  
+- Avoid clustering small tables.  
+- Monitor clustering depth to reduce overhead.
+</details>
+
+<details>
+<summary>Q19: How to check clustering effectiveness?</summary>
+
+**Answer:**  
+- Use Snowflake system functions to view clustering depth and distribution.
+</details>
+
+<details>
+<summary>Q20: How does Snowflake handle skew in clustering?</summary>
+
+**Answer:**  
+- Skewed data may create uneven micro-partition sizes, affecting performance.  
+- Proper choice of clustering keys mitigates skew.
+</details>
+
+---
+
+## 3. Storage Optimization
+
+<details>
+<summary>Q21: How does Snowflake compress data?</summary>
+
+**Answer:**  
+- Columnar storage allows **data-type-specific compression**.  
+- Reduces storage footprint and I/O costs.
+</details>
+
+<details>
+<summary>Q22: What is automatic storage optimization?</summary>
+
+**Answer:**  
+- Snowflake automatically manages **micro-partition size, compression, and clustering** for optimal performance.
+</details>
+
+<details>
+<summary>Q23: How is large table data stored?</summary>
+
+**Answer:**  
+- Split across multiple micro-partitions in cloud object storage.  
+- Supports concurrent access by multiple warehouses.
+</details>
+
+<details>
+<summary>Q24: How does Snowflake achieve near-zero copy clones?</summary>
+
+**Answer:**  
+- Clones reference **existing micro-partition pointers**.  
+- Only changed partitions consume additional storage.
+</details>
+
+<details>
+<summary>Q25: Can storage tiering be used?</summary>
+
+**Answer:**  
+- Snowflake automatically manages storage tiers in the cloud.  
+- Users do not manually control this.
+</details>
+
+<details>
+<summary>Q26: How is storage billed?</summary>
+
+**Answer:**  
+- Based on total **compressed data stored**, including historical partitions retained for Time Travel.
+</details>
+
+<details>
+<summary>Q27: How does Time Travel affect storage?</summary>
+
+**Answer:**  
+- Deleted or updated rows are retained temporarily in micro-partitions.
+</details>
+
+<details>
+<summary>Q28: What is Fail-safe storage?</summary>
+
+**Answer:**  
+- 7-day Snowflake-managed recovery period after Time Travel ends.  
+- Only used for disaster recovery.
+</details>
+
+<details>
+<summary>Q29: How are large deletes handled?</summary>
+
+**Answer:**  
+- Rows are logically deleted first.  
+- Physical cleanup occurs later through storage optimization.
+</details>
+
+<details>
+<summary>Q30: How does Snowflake handle historical data?</summary>
+
+**Answer:**  
+- Micro-partitions retain previous versions for Time Travel.  
+- Clones can access historical data independently.
+</details>
+
+---
+
+## 4. Query Performance & Micro-partitions
+
+<details>
+<summary>Q31: How does Snowflake scan micro-partitions?</summary>
+
+**Answer:**  
+- Only relevant micro-partitions are scanned based on metadata and query filters.
+</details>
+
+<details>
+<summary>Q32: What is partition pruning?</summary>
+
+**Answer:**  
+- Skipping irrelevant micro-partitions that cannot satisfy the query.
+</details>
+
+<details>
+<summary>Q33: How does clustering affect pruning?</summary>
+
+**Answer:**  
+- Better clustering reduces the number of partitions scanned, improving performance.
+</details>
+
+<details>
+<summary>Q34: Can result caching reduce micro-partition scans?</summary>
+
+**Answer:**  
+- Yes, cached query results avoid unnecessary micro-partition reads.
+</details>
+
+<details>
+<summary>Q35: How are joins impacted by micro-partitions?</summary>
+
+**Answer:**  
+- Only relevant micro-partitions are read if filters exist.  
+- Poor clustering may increase scanned partitions.
+</details>
+
+<details>
+<summary>Q36: What happens with highly selective queries?</summary>
+
+**Answer:**  
+- Few micro-partitions are scanned, resulting in faster execution.
+</details>
+
+<details>
+<summary>Q37: What happens with full table scans?</summary>
+
+**Answer:**  
+- All micro-partitions are scanned; clustering has minimal effect.
+</details>
+
+<details>
+<summary>Q38: How does Snowflake optimize I/O?</summary>
+
+**Answer:**  
+- Uses columnar compression, micro-partition pruning, and result caching.
+</details>
+
+<details>
+<summary>Q39: Are micro-partitions immutable?</summary>
+
+**Answer:**  
+- Yes, once created, a micro-partition cannot be modified. Updates create new versions.
+</details>
+
+<details>
+<summary>Q40: How does Snowflake manage concurrent queries on the same table?</summary>
+
+**Answer:**  
+- Multiple warehouses can read the same partitions concurrently.  
+- Writes are serialized for consistency.
+</details>
+
+---
+
+## 5. Advanced Micro-partition Topics
+
+<details>
+<summary>Q41: How to analyze micro-partition distribution?</summary>
+
+**Answer:**  
+- Use Snowflake system functions or monitoring tools to review partition distribution.
+</details>
+
+<details>
+<summary>Q42: What is micro-partition depth?</summary>
+
+**Answer:**  
+- A measure of clustering efficiency and how evenly data is distributed.
+</details>
+
+<details>
+<summary>Q43: How often are micro-partitions reorganized?</summary>
+
+**Answer:**  
+- Reorganization occurs automatically or via manual reclustering if needed.
+</details>
+
+<details>
+<summary>Q44: How does Snowflake prevent excessive micro-partitions?</summary>
+
+**Answer:**  
+- Storage optimization merges small partitions to reduce overhead.
+</details>
+
+<details>
+<summary>Q45: Can you force a recluster?</summary>
+
+**Answer:**  
+- Yes, Snowflake allows manual reclustering for optimization.
+</details>
+
+<details>
+<summary>Q46: How does Snowflake handle skewed inserts?</summary>
+
+**Answer:**  
+- Skewed inserts may create small partitions, later merged by storage optimization.
+</details>
+
+<details>
+<summary>Q47: Can micro-partitions span multiple regions?</summary>
+
+**Answer:**  
+- No, partitions are stored in a single cloud region.  
+- Cross-region replication is handled at the database level.
+</details>
+
+<details>
+<summary>Q48: How does zero-copy cloning interact with micro-partitions?</summary>
+
+**Answer:**  
+- Clones reference existing micro-partitions. Only changes consume additional storage.
+</details>
+
+<details>
+<summary>Q49: How does Snowflake track changes for Time Travel?</summary>
+
+**Answer:**  
+- Each micro-partition version is tracked in metadata logs.
+</details>
+
+<details>
+<summary>Q50: Best practices for storage and micro-partitions?</summary>
+
+**Answer:**  
+- Use clustering for large, selective tables.  
+- Avoid over-clustering small tables.  
+- Monitor clustering depth.  
+- Use automatic storage optimization.  
+- Leverage zero-copy clones to save storage.  
+- Plan Time Travel retention for cost efficiency.
+</details>
+
+---
+
+This document can be combined with **Category 1: Architecture** and **Category 3: Compute** for a complete Snowflake deep-dive study or interview prep guide.
