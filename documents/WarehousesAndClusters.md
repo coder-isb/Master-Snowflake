@@ -3,6 +3,11 @@
 This document provides a **comprehensive 50-question guide** on Snowflake’s compute architecture and virtual warehouses. It covers **architecture, scaling, concurrency, workload isolation, multi-cluster warehouses, cost, and best practices**. Designed for **advanced developers and architects**.
 
 ---
+# Snowflake Compute & Virtual Warehouses – Comprehensive Reference
+
+This document covers **Snowflake’s compute layer**, focusing on **virtual warehouses, scaling, concurrency, workload isolation, billing, and performance tuning**. It is intended for **senior developers and architects** seeking in-depth understanding and best practices.
+
+---
 
 ## Table of Contents
 
@@ -10,7 +15,7 @@ This document provides a **comprehensive 50-question guide** on Snowflake’s co
 2. [Scaling & Concurrency](#2-scaling--concurrency)  
 3. [Workload Isolation](#3-workload-isolation)  
 4. [Billing & Cost Management](#4-billing--cost-management)  
-5. [Performance Tuning & Best Practices](#5-performance-tuning--best-practices)
+5. [Performance Tuning & Best Practices](#5-performance-tuning--best-practices)  
 
 ---
 
@@ -34,17 +39,17 @@ This document provides a **comprehensive 50-question guide** on Snowflake’s co
 ### Q4: What are warehouse sizes?  
 **Answer:**  
 - Ranges from **X-Small → 6X-Large**.  
-- Determines number of **servers, CPUs, and memory** available.
+- Determines number of **servers, CPUs, and memory** available.  
 
 ### Q5: How does Snowflake handle compute elasticity?  
 **Answer:**  
 - Warehouses can scale **vertically** (size) or **horizontally** (multi-cluster).  
-- Provides near-instant scaling for performance needs.
+- Provides near-instant scaling for performance needs.  
 
 ### Q6: What is the difference between single-cluster and multi-cluster warehouses?  
 **Answer:**  
 - **Single-cluster:** One compute cluster per warehouse.  
-- **Multi-cluster:** Multiple clusters for concurrency, automatically added when needed.
+- **Multi-cluster:** Multiple clusters for concurrency, automatically added when needed.  
 
 ### Q7: Can multiple warehouses access the same table simultaneously?  
 **Answer:**  
@@ -61,7 +66,7 @@ This document provides a **comprehensive 50-question guide** on Snowflake’s co
 
 ### Q10: How does Snowflake integrate warehouses with cloud services?  
 **Answer:**  
-- Cloud services layer coordinates query parsing, optimization, and metadata management for warehouses.
+- Cloud services layer coordinates query parsing, optimization, and metadata management for warehouses.  
 
 ---
 
@@ -80,7 +85,7 @@ This document provides a **comprehensive 50-question guide** on Snowflake’s co
 ### Q13: What triggers auto-scaling in multi-cluster warehouses?  
 **Answer:**  
 - Number of **queued queries** exceeding cluster capacity.  
-- Clusters are added automatically up to the configured max.
+- Clusters are added automatically up to the configured max.  
 
 ### Q14: Can warehouses scale down automatically?  
 **Answer:**  
@@ -89,22 +94,22 @@ This document provides a **comprehensive 50-question guide** on Snowflake’s co
 ### Q15: What is auto-suspend?  
 **Answer:**  
 - Warehouse suspends automatically after a period of inactivity.  
-- Saves cost by not billing for idle compute.
+- Saves cost by not billing for idle compute.  
 
 ### Q16: What is auto-resume?  
 **Answer:**  
 - Suspended warehouses **resume automatically** on incoming queries.  
-- Users do not need manual intervention.
+- Users do not need manual intervention.  
 
 ### Q17: How does Snowflake handle query concurrency?  
 **Answer:**  
 - Each warehouse handles queries independently.  
-- Multi-cluster warehouses enable **unlimited concurrency** without blocking.
+- Multi-cluster warehouses enable **unlimited concurrency** without blocking.  
 
 ### Q18: Can queries queue on a busy warehouse?  
 **Answer:**  
 - Yes, if single-cluster warehouse is busy.  
-- Multi-cluster warehouses reduce queuing by spawning additional clusters.
+- Multi-cluster warehouses reduce queuing by spawning additional clusters.  
 
 ### Q19: How is compute load balanced across clusters?  
 **Answer:**  
@@ -112,7 +117,7 @@ This document provides a **comprehensive 50-question guide** on Snowflake’s co
 
 ### Q20: What happens if a query exceeds warehouse capacity?  
 **Answer:**  
-- It queues until resources become available or another cluster is added (multi-cluster warehouse).
+- It queues until resources become available or another cluster is added (multi-cluster warehouse).  
 
 ---
 
@@ -121,7 +126,7 @@ This document provides a **comprehensive 50-question guide** on Snowflake’s co
 ### Q21: How does Snowflake ensure workload isolation?  
 **Answer:**  
 - Each warehouse operates independently.  
-- Concurrent workloads do not impact each other.
+- Concurrent workloads do not impact each other.  
 
 ### Q22: Can multiple warehouses update the same table concurrently?  
 **Answer:**  
@@ -129,7 +134,7 @@ This document provides a **comprehensive 50-question guide** on Snowflake’s co
 
 ### Q23: How are transactional conflicts handled?  
 **Answer:**  
-- Snowflake uses **serialization and commit protocols** to ensure consistency.
+- Snowflake uses **serialization and commit protocols** to ensure consistency.  
 
 ### Q24: Can a warehouse failure affect other warehouses?  
 **Answer:**  
@@ -141,7 +146,7 @@ This document provides a **comprehensive 50-question guide** on Snowflake’s co
 
 ### Q26: Are there limits to concurrency per warehouse?  
 **Answer:**  
-- Single-cluster warehouse has finite concurrency; multi-cluster warehouses **eliminate bottlenecks**.
+- Single-cluster warehouse has finite concurrency; multi-cluster warehouses **eliminate bottlenecks**.  
 
 ### Q27: Can you assign warehouses per team or project?  
 **Answer:**  
@@ -158,7 +163,7 @@ This document provides a **comprehensive 50-question guide** on Snowflake’s co
 ### Q30: What is multi-cluster warehouse concurrency scaling?  
 **Answer:**  
 - Automatically spins up clusters for high query concurrency.  
-- Downscales when load decreases.
+- Downscales when load decreases.  
 
 ---
 
@@ -187,15 +192,15 @@ This document provides a **comprehensive 50-question guide** on Snowflake’s co
 
 ### Q36: How can cost be optimized across warehouses?  
 **Answer:**  
-- Use **auto-suspend, auto-resume**, right-size warehouses, and monitor cluster utilization.
+- Use **auto-suspend, auto-resume**, right-size warehouses, and monitor cluster utilization.  
 
 ### Q37: How does query concurrency affect billing?  
 **Answer:**  
-- High concurrency may trigger additional clusters; billing depends on **number and duration of active clusters**.
+- High concurrency may trigger additional clusters; billing depends on **number and duration of active clusters**.  
 
 ### Q38: Can warehouses be paused manually?  
 **Answer:**  
-- Yes, warehouses can be manually suspended to save costs.
+- Yes, warehouses can be manually suspended to save costs.  
 
 ### Q39: How are credits calculated for resuming warehouses?  
 **Answer:**  
@@ -203,7 +208,7 @@ This document provides a **comprehensive 50-question guide** on Snowflake’s co
 
 ### Q40: How to monitor warehouse cost and usage?  
 **Answer:**  
-- Snowflake **ACCOUNT_USAGE** views and **Resource Monitors** track compute usage and billing.
+- Snowflake **ACCOUNT_USAGE** views and **Resource Monitors** track compute usage and billing.  
 
 ---
 
@@ -212,7 +217,7 @@ This document provides a **comprehensive 50-question guide** on Snowflake’s co
 ### Q41: How to size a warehouse for optimal performance?  
 **Answer:**  
 - Consider query complexity, concurrency, and data volume.  
-- Start small, monitor performance, scale as needed.
+- Start small, monitor performance, scale as needed.  
 
 ### Q42: How to handle large ETL workloads?  
 **Answer:**  
@@ -233,7 +238,7 @@ This document provides a **comprehensive 50-question guide** on Snowflake’s co
 
 ### Q46: How to monitor warehouse performance?  
 **Answer:**  
-- Use **QUERY_HISTORY, WAREHOUSE_LOAD_HISTORY**, and system dashboards.
+- Use **QUERY_HISTORY, WAREHOUSE_LOAD_HISTORY**, and system dashboards.  
 
 ### Q47: How to manage multiple warehouses efficiently?  
 **Answer:**  
@@ -243,7 +248,7 @@ This document provides a **comprehensive 50-question guide** on Snowflake’s co
 **Answer:**  
 - Oversized warehouses wasting cost.  
 - Undersized warehouses causing query queuing.  
-- Poorly isolated workloads.
+- Poorly isolated workloads.  
 
 ### Q49: How to tune for high concurrency workloads?  
 **Answer:**  
